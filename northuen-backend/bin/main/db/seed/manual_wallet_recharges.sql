@@ -1,0 +1,13 @@
+-- Manual pilot recharge seed.
+-- Apply similar rows when Northuen staff manually top up a user's token wallet.
+--
+-- insert into wallet_accounts (user_id, token_balance)
+-- select id, 500.00 from users where email = 'customer@northuen.bt'
+-- on conflict (user_id) do update set token_balance = excluded.token_balance, updated_at = now();
+--
+-- insert into wallet_transactions (wallet_id, type, amount, balance_after, reference, note)
+-- select wallet_accounts.id, 'MANUAL_RECHARGE', 500.00, 500.00, 'SEED-CUSTOMER-500', 'Pilot manual token recharge'
+-- from wallet_accounts
+-- join users on users.id = wallet_accounts.user_id
+-- where users.email = 'customer@northuen.bt'
+-- on conflict (reference) do nothing;

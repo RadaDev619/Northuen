@@ -100,6 +100,21 @@ Key endpoints:
 - `GET /api/admin/settlements?status=PENDING`
 - `PATCH /api/admin/settlements/{id}/mark-paid`
 
+### Pick & Drop APIs
+
+- `POST /api/pickdrop/fare`
+- `POST /api/pickdrop/orders`
+- `GET /api/pickdrop/orders/my`
+- `GET /api/pickdrop/orders/{id}`
+- `GET /api/pickdrop/orders/{id}/live-location`
+- `GET /api/pickdrop/driver/available`
+- `GET /api/pickdrop/driver/mine`
+- `PATCH /api/pickdrop/driver/orders/{id}/accept`
+- `PATCH /api/pickdrop/driver/orders/{id}/reject`
+- `PATCH /api/pickdrop/driver/orders/{id}/status`
+- `POST /api/pickdrop/driver/orders/{id}/location`
+- `PATCH /api/pickdrop/driver/orders/{id}/complete`
+
 ## Flutter Setup
 
 ```powershell
@@ -142,6 +157,31 @@ Seeded vendors include a restaurant and shop with products, plus available drive
 - Docker files are included for local/container deployment.
 - Driver cash settlements are tracked separately from customer COD payment collection.
 - Flutter writes critical order, payment, delivery, and settlement data only through backend APIs.
+
+## Live Tracking
+
+Drivers send real Android GPS updates to the backend through `POST /api/deliveries/{id}/location`. The backend writes `delivery_tracking`. Customer tracking screens subscribe to Supabase Realtime for `delivery_tracking` inserts when these Flutter build values are provided:
+
+```powershell
+--dart-define=SUPABASE_URL=https://your-project.supabase.co
+--dart-define=SUPABASE_ANON_KEY=your-anon-key
+```
+
+If those values are not provided, the app falls back to backend polling every 8 seconds. Critical tracking writes still go through the backend.
+
+Pick & Drop uses the same backend-controlled pattern: driver GPS writes go through `POST /api/pickdrop/driver/orders/{id}/location`, the backend upserts `driver_live_locations`, and customer tracking subscribes to Supabase Realtime for `driver_live_locations` by `order_id`. Without Supabase build values, Pick & Drop tracking polls the backend every 5 seconds.
+
+## Geoapify Map Prototype Build
+
+Pick & Drop screens use Geoapify map tiles with real Android GPS tracking. Build the pilot APK with a Geoapify API key:
+
+```powershell
+flutter build apk --release `
+  --dart-define=API_BASE_URL=http://10.9.88.105:8081 `
+  --dart-define=GEOAPIFY_API_KEY=750a2a28229d4c87818b02b708c9f078 `
+  --dart-define=SUPABASE_URL=https://wsbpgeitpgtzxiqeedpx.supabase.co `
+  --dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzYnBnZWl0cGd0enhpcWVlZHB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMTc2NDQsImV4cCI6MjA5Mjc5MzY0NH0.NenEZbJnh-I1jWhlEuXG9WVr4z1GUgK1hHUwIg669VI
+```
 
 ## Verification
 

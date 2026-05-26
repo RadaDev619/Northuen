@@ -8,6 +8,7 @@ create type payment_method as enum ('CASH');
 create type payment_status as enum ('PENDING', 'PAID');
 create type delivery_status as enum ('PENDING_ASSIGNMENT', 'ASSIGNED', 'ACCEPTED', 'PICKED_UP', 'ON_THE_WAY', 'DELIVERED');
 create type settlement_status as enum ('PENDING', 'PAID');
+create type pickdrop_status as enum ('PENDING', 'DRIVER_ASSIGNED', 'ACCEPTED', 'ARRIVED_PICKUP', 'PICKED_UP', 'ARRIVED_DROP', 'DELIVERED', 'CANCELLED');
 
 create table users (
     id uuid primary key default gen_random_uuid(),
@@ -132,6 +133,8 @@ create table delivery_tracking (
     updated_at timestamp not null default now()
 );
 
+alter table delivery_tracking replica identity full;
+
 create table payments (
     id uuid primary key default gen_random_uuid(),
     order_id uuid not null unique references orders(id) on delete cascade,
@@ -183,6 +186,47 @@ create table notifications (
     updated_at timestamp not null default now()
 );
 
+create table pickdrop_orders (
+    id uuid primary key default gen_random_uuid(),
+    customer_id uuid not null references users(id) on delete cascade,
+    driver_id uuid references drivers(id),
+    pickup_address text not null,
+    pickup_lat numeric(10,7) not null,
+    pickup_lng numeric(10,7) not null,
+    drop_address text not null,
+    drop_lat numeric(10,7) not null,
+    drop_lng numeric(10,7) not null,
+    item_type varchar(80) not null,
+    item_description text not null,
+    estimated_distance_km numeric(8,2) not null check (estimated_distance_km >= 0),
+    estimated_price numeric(12,2) not null check (estimated_price >= 0),
+    status varchar(30) not null default 'PENDING' check (status in ('PENDING', 'DRIVER_ASSIGNED', 'ACCEPTED', 'ARRIVED_PICKUP', 'PICKED_UP', 'ARRIVED_DROP', 'DELIVERED', 'CANCELLED')),
+    payment_status varchar(20) not null default 'PENDING' check (payment_status in ('PENDING', 'PAID')),
+    created_at timestamp not null default now(),
+    updated_at timestamp not null default now()
+);
+
+create table driver_live_locations (
+    driver_id uuid not null references drivers(id) on delete cascade,
+    order_id uuid not null references pickdrop_orders(id) on delete cascade,
+    lat numeric(10,7) not null,
+    lng numeric(10,7) not null,
+    heading numeric(6,2),
+    speed numeric(6,2),
+    updated_at timestamp not null default now(),
+    primary key (driver_id, order_id)
+);
+
+create table pickdrop_messages (
+    id uuid primary key default gen_random_uuid(),
+    order_id uuid not null references pickdrop_orders(id) on delete cascade,
+    sender_id uuid not null references users(id) on delete cascade,
+    sender_role varchar(20) not null check (sender_role in ('CUSTOMER', 'DRIVER', 'VENDOR', 'ADMIN')),
+    body text not null check (length(trim(body)) > 0 and length(body) <= 1000),
+    created_at timestamp not null default now(),
+    updated_at timestamp not null default now()
+);
+
 create index idx_users_email on users(email);
 create index idx_users_role on users(role);
 create index idx_vendors_category on vendors(category);
@@ -198,6 +242,14 @@ create index idx_payments_status on payments(status);
 create index idx_settlements_driver on driver_cash_settlements(driver_id);
 create index idx_settlements_status on driver_cash_settlements(status);
 create index idx_reviews_order on reviews(order_id);
+create index idx_pickdrop_customer on pickdrop_orders(customer_id);
+create index idx_pickdrop_driver on pickdrop_orders(driver_id);
+create index idx_pickdrop_status on pickdrop_orders(status);
+create index idx_pickdrop_created on pickdrop_orders(created_at);
+create index idx_driver_live_order on driver_live_locations(order_id);
+create index idx_driver_live_updated on driver_live_locations(updated_at);
+create index idx_pickdrop_messages_order_time on pickdrop_messages(order_id, created_at);
+create index idx_pickdrop_messages_sender on pickdrop_messages(sender_id);
 
 create or replace function set_updated_at()
 returns trigger as $$
@@ -221,3 +273,9 @@ create trigger payments_updated_at before update on payments for each row execut
 create trigger driver_cash_settlements_updated_at before update on driver_cash_settlements for each row execute function set_updated_at();
 create trigger reviews_updated_at before update on reviews for each row execute function set_updated_at();
 create trigger notifications_updated_at before update on notifications for each row execute function set_updated_at();
+create trigger pickdrop_orders_updated_at before update on pickdrop_orders for each row execute function set_updated_at();
+create trigger pickdrop_messages_updated_at before update on pickdrop_messages for each row execute function set_updated_at();
+
+alter table delivery_tracking replica identity full;
+alter table driver_live_locations replica identity full;
+alter table pickdrop_messages replica identity full;

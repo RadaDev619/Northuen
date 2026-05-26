@@ -11,7 +11,7 @@ PORT=8081
 DATABASE_URL=jdbc:postgresql://<host>:<port>/<database>?sslmode=require
 DATABASE_USERNAME=<username>
 DATABASE_PASSWORD=<password>
-DB_MAX_POOL_SIZE=1
+DB_MAX_POOL_SIZE=2
 DB_MIN_IDLE=0
 DB_CONNECTION_TIMEOUT_MS=30000
 DB_IDLE_TIMEOUT_MS=300000
@@ -55,7 +55,7 @@ cd northuen_app
 flutter build apk --release --dart-define=API_BASE_URL=https://your-render-service.onrender.com
 ```
 
-If Supabase reports `MaxClientsInSessionMode`, Render is still using Supabase session mode, usually port `5432`. Use the transaction pooler on port `6543` and keep `DB_MAX_POOL_SIZE=1` for pilot. For transaction pooling, a safe JDBC URL is:
+If Supabase reports `MaxClientsInSessionMode`, Render is still using Supabase session mode, usually port `5432`. Use the transaction pooler on port `6543` and keep `DB_MAX_POOL_SIZE=2` for pilot. For transaction pooling, a safe JDBC URL is:
 
 ```text
 jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0

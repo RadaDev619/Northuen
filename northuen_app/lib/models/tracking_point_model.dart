@@ -10,6 +10,6 @@ class TrackingPoint {
         id: json['id'],
         latitude: json['latitude'],
         longitude: json['longitude'],
-        createdAt: DateTime.parse(json['createdAt']),
+        createdAt: DateTime.parse(json['createdAt'] ?? json['created_at']),
       );
 }

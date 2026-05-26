@@ -5,8 +5,10 @@ import 'package:http/http.dart' as http;
 import '../core/config.dart';
 
 class ApiException implements Exception {
-  ApiException(this.message);
+  ApiException(this.message, {this.statusCode});
   final String message;
+  final int? statusCode;
+
   @override
   String toString() => message;
 }
@@ -43,8 +45,14 @@ class ApiClient {
     }
     if (response.body.isNotEmpty) {
       final json = jsonDecode(response.body);
-      throw ApiException(json['message'] ?? 'Request failed');
+      throw ApiException(
+        json['message'] ?? 'Request failed',
+        statusCode: response.statusCode,
+      );
     }
-    throw ApiException('Request failed with ${response.statusCode}');
+    throw ApiException(
+      'Request failed with ${response.statusCode}',
+      statusCode: response.statusCode,
+    );
   }
 }
