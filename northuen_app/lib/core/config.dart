@@ -1,7 +1,7 @@
 class AppConfig {
   static const apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://northuen-pilot.onrender.com',
+    defaultValue: 'https://northuen-backend-814824894845.asia-south1.run.app',
   );
   static const supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
