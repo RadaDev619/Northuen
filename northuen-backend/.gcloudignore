@@ -1,0 +1,10 @@
+.git
+.gradle
+build
+bin
+*.log
+.env
+*.env
+backend-*.log
+backend-*.out.log
+backend-*.err.log
