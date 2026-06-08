@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../core/app_theme.dart';
 import '../models/notification_model.dart';
 import '../state/app_state.dart';
 
@@ -25,6 +26,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     final app = context.watch<AppState>();
     return Scaffold(
+      backgroundColor: NorthuenTheme.customerBackground,
       appBar: AppBar(title: const Text('Notifications')),
       body: RefreshIndicator(
         onRefresh: app.loadNotifications,
@@ -72,11 +74,13 @@ class _NotificationCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   backgroundColor: unread
-                      ? const Color(0xFFD2AB50)
-                      : const Color(0xFFE8E1D6),
+                      ? NorthuenTheme.customerSurfaceAlt
+                      : const Color(0xFFF1F5F2),
                   child: Icon(
                     _iconFor(item.type),
-                    color: const Color(0xFF1E1E1E),
+                    color: unread
+                        ? NorthuenTheme.customerPrimary
+                        : NorthuenTheme.muted,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -102,7 +106,7 @@ class _NotificationCard extends StatelessWidget {
                               width: 9,
                               height: 9,
                               decoration: const BoxDecoration(
-                                color: Color(0xFF16A34A),
+                                color: NorthuenTheme.customerSecondary,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -150,6 +154,7 @@ class _EmptyNotifications extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: NorthuenTheme.customerBorder),
       ),
       child: const Column(
         children: [

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../core/app_theme.dart';
 import '../state/app_state.dart';
 import '../widgets/money_text.dart';
 import '../widgets/status_chip.dart';
@@ -62,14 +63,16 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                     style: TextStyle(fontWeight: FontWeight.w800),
                   ),
                   subtitle: Text(dateFormat.format(order.createdAt)),
-                  leading: const Icon(Icons.route_rounded),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      StatusChip(order.status),
-                      MoneyText(order.estimatedPrice),
-                    ],
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFFFFF7ED),
+                    child: Icon(
+                      Icons.route_rounded,
+                      color: NorthuenTheme.customerPrimary,
+                    ),
+                  ),
+                  trailing: _OrderMeta(
+                    status: order.status,
+                    amount: order.estimatedPrice,
                   ),
                 ),
               ),
@@ -90,20 +93,50 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   subtitle: Text(dateFormat.format(order.createdAt)),
-                  leading: const Icon(Icons.receipt_long_rounded),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      StatusChip(order.status),
-                      MoneyText(order.totalAmount),
-                    ],
+                  leading: const CircleAvatar(
+                    backgroundColor: NorthuenTheme.customerSurfaceAlt,
+                    child: Icon(
+                      Icons.receipt_long_rounded,
+                      color: NorthuenTheme.customerSecondary,
+                    ),
+                  ),
+                  trailing: _OrderMeta(
+                    status: order.status,
+                    amount: order.totalAmount,
                   ),
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _OrderMeta extends StatelessWidget {
+  const _OrderMeta({required this.status, required this.amount});
+
+  final String status;
+  final num amount;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 98,
+      height: 48,
+      child: FittedBox(
+        alignment: Alignment.centerRight,
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            StatusChip(status),
+            const SizedBox(height: 4),
+            MoneyText(amount),
+          ],
+        ),
       ),
     );
   }

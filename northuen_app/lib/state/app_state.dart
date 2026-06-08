@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/cash_report_model.dart';
+import '../models/driver_earnings_model.dart';
 import '../models/driver_model.dart';
 import '../models/notification_model.dart';
 import '../models/order_model.dart';
@@ -37,6 +38,7 @@ class AppState extends ChangeNotifier {
   List<Driver> drivers = [];
   List<AppUser> users = [];
   CashReport? cashReport;
+  DriverEarnings? driverEarnings;
   WalletAccount? wallet;
   List<TrackingPoint> trackingPoints = [];
   List<AppNotification> notifications = [];
@@ -113,6 +115,7 @@ class AppState extends ChangeNotifier {
     pickDropContact = null;
     activePickDropCall = null;
     incomingPickDropCall = null;
+    driverEarnings = null;
     wallet = null;
     notifications = [];
     unreadNotifications = 0;
@@ -231,6 +234,13 @@ class AppState extends ChangeNotifier {
               .map((json) => TrackingPoint.fromJson(json))
               .toList(),
     );
+  }
+
+  Future<Order> refreshOrder(String orderId) async {
+    final order = Order.fromJson(await api.get('/api/orders/$orderId'));
+    orders = [order, ...orders.where((existing) => existing.id != order.id)];
+    notifyListeners();
+    return order;
   }
 
   void setTrackingPoints(List<TrackingPoint> points) {
@@ -373,6 +383,20 @@ class AppState extends ChangeNotifier {
     return order;
   }
 
+  Future<PickDropOrder?> completeCustomerPickDrop(String orderId) async {
+    PickDropOrder? updated;
+    await _run(() async {
+      updated = PickDropOrder.fromJson(
+        await api.patch('/api/pickdrop/orders/$orderId/complete', {}),
+      );
+      pickDropOrders = [
+        updated!,
+        ...pickDropOrders.where((existing) => existing.id != updated!.id),
+      ];
+    });
+    return updated;
+  }
+
   Future<void> loadPickDropDriverWork() async {
     await _run(() async {
       availablePickDropOrders =
@@ -443,6 +467,7 @@ class AppState extends ChangeNotifier {
           api.patch('/api/pickdrop/driver/orders/$orderId/complete', {}),
     );
     await loadPickDropDriverWork();
+    await loadDriverEarnings();
   }
 
   Future<DriverLiveLocation?> loadPickDropLiveLocation(String orderId) async {
@@ -605,6 +630,14 @@ class AppState extends ChangeNotifier {
     });
   }
 
+  Future<void> loadDriverEarnings() async {
+    await _run(() async {
+      driverEarnings = DriverEarnings.fromJson(
+        await api.get('/api/drivers/earnings'),
+      );
+    });
+  }
+
   Future<bool> acceptAvailableDelivery(String deliveryId) async {
     final accepted = await _run(
       () async =>
@@ -637,11 +670,26 @@ class AppState extends ChangeNotifier {
     });
   }
 
+  Future<Order?> completeCustomerOrder(String orderId) async {
+    Order? updated;
+    await _run(() async {
+      updated = Order.fromJson(
+        await api.patch('/api/orders/$orderId/complete', {}),
+      );
+      orders = [
+        updated!,
+        ...orders.where((existing) => existing.id != updated!.id),
+      ];
+    });
+    return updated;
+  }
+
   Future<void> completeDelivery(String deliveryId) async {
     await _run(
       () async => api.patch('/api/deliveries/$deliveryId/complete', {}),
     );
     await loadDriverWork();
+    await loadDriverEarnings();
   }
 
   Future<void> loadAdmin() async {

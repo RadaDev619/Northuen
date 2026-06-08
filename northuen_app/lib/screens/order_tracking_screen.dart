@@ -27,10 +27,13 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   Timer? _pollingTimer;
   String _trackingMode = 'Connecting';
   GoogleMapController? _mapController;
+  late Order _order;
+  bool _completing = false;
 
   @override
   void initState() {
     super.initState();
+    _order = widget.order;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _startTracking();
     });
@@ -96,8 +99,8 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    StatusChip(widget.order.status),
-                    StatusChip(widget.order.paymentStatus),
+                    StatusChip(_order.status),
+                    StatusChip(_order.paymentStatus),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -126,7 +129,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  widget.order.dropoffAddress,
+                  _order.dropoffAddress,
                   style: const TextStyle(fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 6),
@@ -135,7 +138,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                   children: [
                     const Text('Pay Cash on Delivery'),
                     MoneyText(
-                      widget.order.totalAmount,
+                      _order.totalAmount,
                       style: const TextStyle(fontWeight: FontWeight.w900),
                     ),
                   ],
@@ -150,7 +153,26 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                         label: const Text('Refresh'),
                       ),
                     ),
-                    if (widget.order.status == 'DELIVERED') ...[
+                    if (_canCustomerComplete) ...[
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: _completing ? null : _markComplete,
+                          icon: _completing
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.check_circle_rounded),
+                          label: Text(
+                            _completing ? 'Saving...' : 'Mark complete',
+                          ),
+                        ),
+                      ),
+                    ] else if (_order.status == 'DELIVERED') ...[
                       const SizedBox(width: 10),
                       Expanded(
                         child: FilledButton.icon(
@@ -172,7 +194,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
   Future<void> _startTracking() async {
     await _refreshTracking();
-    final deliveryId = widget.order.delivery?.id;
+    final deliveryId = _order.delivery?.id;
     if (deliveryId == null) {
       setState(() => _trackingMode = 'Waiting for driver assignment');
       return;
@@ -205,7 +227,55 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   LatLng _g(ll.LatLng point) => LatLng(point.latitude, point.longitude);
 
   Future<void> _refreshTracking() async {
-    await context.read<AppState>().loadTracking(widget.order.id);
+    final app = context.read<AppState>();
+    final next = await app.refreshOrder(_order.id);
+    await app.loadTracking(_order.id);
+    if (!mounted) return;
+    setState(() => _order = next);
+  }
+
+  bool get _canCustomerComplete => !const {
+    'DELIVERED',
+    'CANCELLED',
+    'VENDOR_REJECTED',
+  }.contains(_order.status);
+
+  Future<void> _markComplete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Mark delivery complete?'),
+        content: const Text(
+          'This will mark the delivery as delivered and paid.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Mark complete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _completing = true);
+    final updated = await context.read<AppState>().completeCustomerOrder(
+      _order.id,
+    );
+    if (!mounted) return;
+    setState(() {
+      if (updated != null) _order = updated;
+      _completing = false;
+    });
+    final message = updated == null
+        ? context.read<AppState>().error ?? 'Could not complete delivery.'
+        : 'Delivery marked complete.';
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _review() async {

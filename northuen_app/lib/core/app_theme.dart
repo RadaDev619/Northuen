@@ -8,6 +8,12 @@ class NorthuenTheme {
   static const muted = Color(0xFF6B7280);
   static const success = Color(0xFF16A34A);
   static const error = Color(0xFFDC2626);
+  static const customerBackground = Color(0xFFFFFBEB);
+  static const customerSurfaceAlt = Color(0xFFFEF3C7);
+  static const customerPrimary = Color(0xFFB45309);
+  static const customerSecondary = Color(0xFF92400E);
+  static const customerAccent = Color(0xFF334155);
+  static const customerBorder = Color(0xFFFDE68A);
 
   static ThemeData light() {
     final scheme = ColorScheme.fromSeed(

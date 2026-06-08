@@ -42,6 +42,7 @@ class _PickDropTrackingScreenState extends State<PickDropTrackingScreen> {
   bool _autoFollow = true;
   bool _stale = false;
   bool _loadingRoute = false;
+  bool _completing = false;
   String _mode = 'Connecting...';
 
   @override
@@ -173,12 +174,36 @@ class _PickDropTrackingScreenState extends State<PickDropTrackingScreen> {
               onCall: _chatEnabled ? _openCall : null,
               onMessage: _chatEnabled ? _openChat : null,
             ),
-            extraContent: _AddressSummary(
-              pickupAddress: _order.pickupAddress,
-              dropAddress: _order.dropAddress,
-              itemType: _order.itemType,
-              price: _order.estimatedPrice,
-              mode: _mode,
+            extraContent: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _AddressSummary(
+                  pickupAddress: _order.pickupAddress,
+                  dropAddress: _order.dropAddress,
+                  itemType: _order.itemType,
+                  price: _order.estimatedPrice,
+                  mode: _mode,
+                ),
+                if (_canCustomerComplete) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: _completing ? null : _markComplete,
+                      icon: _completing
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.check_circle_rounded),
+                      label: Text(
+                        _completing ? 'Saving...' : 'Mark trip complete',
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           PickDropIncomingCallBanner(
@@ -329,6 +354,45 @@ class _PickDropTrackingScreenState extends State<PickDropTrackingScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Share tracking link placeholder')),
     );
+  }
+
+  bool get _canCustomerComplete =>
+      !const {'DELIVERED', 'CANCELLED'}.contains(_order.status);
+
+  Future<void> _markComplete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Mark trip complete?'),
+        content: const Text('This will mark the trip as delivered and paid.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Mark complete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _completing = true);
+    final updated = await context.read<AppState>().completeCustomerPickDrop(
+      _order.id,
+    );
+    if (!mounted) return;
+    setState(() {
+      if (updated != null) _order = updated;
+      _completing = false;
+    });
+    final message = updated == null
+        ? context.read<AppState>().error ?? 'Could not complete trip.'
+        : 'Trip marked complete.';
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _showMarkerAddress(TrackingMarkerKind kind) {
