@@ -4,10 +4,13 @@ import 'package:provider/provider.dart';
 
 import '../state/app_state.dart';
 import '../state/cart_state.dart';
+import '../core/app_theme.dart';
+import '../widgets/northuen_ui.dart';
 import 'cart_screen.dart';
 import 'home_dashboard_screen.dart';
 import 'order_history_screen.dart';
 import 'notifications_screen.dart';
+import 'parcel_request_screen.dart';
 import 'pickdrop_request_screen.dart';
 import 'profile_screen.dart';
 import 'vendor_list_screen.dart';
@@ -35,52 +38,30 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     final cartCount = context.watch<CartState>().lines.length;
     final pages = [
       HomeDashboardScreen(
-        onPickDrop: () => setState(() => _index = 1),
-        onFood: () => Navigator.of(
+        onPickDrop: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const PickDropRequestScreen()),
+        ),
+        onFood: () => _openVendors('FOOD'),
+        onShop: () => _openVendors('SHOP'),
+        onParcel: () => Navigator.of(
           context,
-        ).push(MaterialPageRoute(builder: (_) => const VendorListScreen())),
+        ).push(MaterialPageRoute(builder: (_) => const ParcelRequestScreen())),
       ),
-      const PickDropRequestScreen(),
       const OrderHistoryScreen(),
       const _WalletScreen(),
+      const NotificationsScreen(),
       const ProfileScreen(),
     ];
     return Scaffold(
       appBar: AppBar(
-        title: Row(
+        title: const Row(
           children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD2AB50),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.near_me_rounded,
-                size: 19,
-                color: Color(0xFF1E1E1E),
-              ),
-            ),
-            const SizedBox(width: 10),
-            const Text(
-              'Northuen',
-              style: TextStyle(fontWeight: FontWeight.w900),
-            ),
+            NorthuenBrandMark(size: 34),
+            SizedBox(width: 10),
+            Text('Northuen', style: TextStyle(fontWeight: FontWeight.w900)),
           ],
         ),
         actions: [
-          IconButton(
-            tooltip: 'Notifications',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-            ),
-            icon: Badge(
-              label: Text('${context.watch<AppState>().unreadNotifications}'),
-              isLabelVisible: context.watch<AppState>().unreadNotifications > 0,
-              child: const Icon(Icons.notifications_rounded),
-            ),
-          ),
           IconButton(
             tooltip: 'Cart',
             onPressed: () => Navigator.of(
@@ -100,20 +81,31 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
         onDestinationSelected: (value) => setState(() => _index = value),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_rounded), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.route_rounded), label: 'Book'),
           NavigationDestination(
             icon: Icon(Icons.receipt_long_rounded),
-            label: 'Activity',
+            label: 'Orders',
           ),
           NavigationDestination(
             icon: Icon(Icons.account_balance_wallet_rounded),
             label: 'Wallet',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_rounded),
+            icon: Icon(Icons.notifications_rounded),
+            label: 'Updates',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded),
             label: 'Profile',
           ),
         ],
+      ),
+    );
+  }
+
+  void _openVendors(String category) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => VendorListScreen(initialCategory: category),
       ),
     );
   }
@@ -157,14 +149,14 @@ class _WalletScreenState extends State<_WalletScreen> {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E1E1E),
-              borderRadius: BorderRadius.circular(24),
+              color: NorthuenTheme.primary,
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Northuen Token Balance',
+                  'Available token balance',
                   style: TextStyle(
                     color: Colors.white70,
                     fontWeight: FontWeight.w700,
@@ -183,29 +175,31 @@ class _WalletScreenState extends State<_WalletScreen> {
                 ),
                 const SizedBox(height: 14),
                 const Text(
-                  'Tokens are recharged manually by Northuen staff for the pilot.',
+                  'Pilot recharge records are managed by Northuen operations.',
                   style: TextStyle(color: Colors.white70),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 14),
-          const Card(
-            child: ListTile(
-              leading: Icon(Icons.add_card_rounded),
-              title: Text('Manual Recharge'),
-              subtitle: Text(
-                'Pilot top-ups are added from backend seed/admin records.',
+          const Row(
+            children: [
+              Expanded(
+                child: _WalletInfoCard(
+                  icon: Icons.add_card_rounded,
+                  title: 'Recharge',
+                  subtitle: 'Manual pilot top-up',
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          const Card(
-            child: ListTile(
-              leading: Icon(Icons.payments_rounded),
-              title: Text('Cash on Delivery'),
-              subtitle: Text('Still available for deliveries and pick & drop.'),
-            ),
+              SizedBox(width: 10),
+              Expanded(
+                child: _WalletInfoCard(
+                  icon: Icons.payments_outlined,
+                  title: 'COD',
+                  subtitle: 'Pay on delivery',
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 18),
           Text(
@@ -218,12 +212,10 @@ class _WalletScreenState extends State<_WalletScreen> {
           if (app.loading && wallet == null)
             const Center(child: CircularProgressIndicator()),
           if (!app.loading && wallet != null && wallet.transactions.isEmpty)
-            const Card(
-              child: ListTile(
-                leading: Icon(Icons.receipt_long_rounded),
-                title: Text('No token activity yet'),
-                subtitle: Text('Manual recharge records will appear here.'),
-              ),
+            const NorthuenEmptyState(
+              icon: Icons.receipt_long_outlined,
+              title: 'No token activity',
+              message: 'Recharge and wallet records will appear here.',
             ),
           if (wallet != null)
             ...wallet.transactions.map(
@@ -276,5 +268,35 @@ class _WalletScreenState extends State<_WalletScreen> {
       return value.toStringAsFixed(0);
     }
     return value.toStringAsFixed(2);
+  }
+}
+
+class _WalletInfoCard extends StatelessWidget {
+  const _WalletInfoCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: NorthuenTheme.teal),
+            const SizedBox(height: 12),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+            Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
+      ),
+    );
   }
 }

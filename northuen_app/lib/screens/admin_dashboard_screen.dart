@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../state/app_state.dart';
 import '../widgets/money_text.dart';
 import '../widgets/status_chip.dart';
+import '../core/app_theme.dart';
 import 'profile_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -429,7 +430,7 @@ class _Metric extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(icon, color: Theme.of(context).colorScheme.primary),
+            Icon(icon, color: NorthuenTheme.primary),
             Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
             amount == null
                 ? Text(

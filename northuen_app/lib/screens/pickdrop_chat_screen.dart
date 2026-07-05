@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../core/config.dart';
+import '../core/app_theme.dart';
 import '../models/pickdrop_model.dart';
 import '../services/realtime_tracking_service.dart';
 import '../state/app_state.dart';
@@ -74,9 +75,7 @@ class _PickDropChatScreenState extends State<PickDropChatScreen> {
                   horizontal: 16,
                   vertical: 10,
                 ),
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: .08),
+                color: NorthuenTheme.primary.withValues(alpha: .06),
                 child: Text(
                   widget.order.driverName == null
                       ? 'Chat opens after driver accepts.'
@@ -86,7 +85,25 @@ class _PickDropChatScreenState extends State<PickDropChatScreen> {
               ),
               Expanded(
                 child: messages.isEmpty
-                    ? const Center(child: Text('No messages yet'))
+                    ? const Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.chat_bubble_outline_rounded,
+                              size: 42,
+                              color: NorthuenTheme.muted,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'No messages yet',
+                              style: TextStyle(fontWeight: FontWeight.w800),
+                            ),
+                            SizedBox(height: 4),
+                            Text('Start the conversation about this delivery.'),
+                          ],
+                        ),
+                      )
                     : ListView.builder(
                         controller: _scrollController,
                         padding: const EdgeInsets.all(16),
@@ -220,8 +237,14 @@ class _MessageBubble extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: mine ? Theme.of(context).colorScheme.primary : Colors.white,
-            borderRadius: BorderRadius.circular(8),
+            color: mine ? NorthuenTheme.primary : Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(8),
+              topRight: const Radius.circular(8),
+              bottomLeft: Radius.circular(mine ? 8 : 2),
+              bottomRight: Radius.circular(mine ? 2 : 8),
+            ),
+            border: mine ? null : Border.all(color: NorthuenTheme.border),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

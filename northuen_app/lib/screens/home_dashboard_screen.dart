@@ -1,236 +1,194 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../core/app_theme.dart';
 import '../state/app_state.dart';
+import '../widgets/northuen_ui.dart';
 
 class HomeDashboardScreen extends StatelessWidget {
   const HomeDashboardScreen({
     super.key,
     required this.onPickDrop,
     required this.onFood,
+    required this.onShop,
+    required this.onParcel,
   });
 
   final VoidCallback onPickDrop;
   final VoidCallback onFood;
+  final VoidCallback onShop;
+  final VoidCallback onParcel;
 
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AppState>().user;
-    const center = LatLng(27.4728, 89.6390);
     return ListView(
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Kuzuzangpo, ${_firstName(user?.fullName ?? 'Chencho')}',
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.w900),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Thimphu, Bhutan',
-                          style: TextStyle(
-                            color: Color(0xFF6B7280),
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
+                  Text(
+                    'Deliver to',
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  CircleAvatar(
-                    backgroundColor: const Color(0xFFD2AB50),
-                    child: Text(
-                      _firstName(
-                        user?.fullName ?? 'C',
-                      ).characters.first.toUpperCase(),
-                      style: const TextStyle(
-                        color: Color(0xFF1E1E1E),
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: .05),
-                      blurRadius: 18,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.search_rounded, color: Color(0xFF6B7280)),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Where do you want to go?',
-                        style: TextStyle(
-                          color: Color(0xFF6B7280),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 230,
-          child: Stack(
-            children: [
-              GoogleMap(
-                initialCameraPosition: CameraPosition(target: center, zoom: 13),
-                zoomControlsEnabled: false,
-                myLocationButtonEnabled: false,
-                scrollGesturesEnabled: false,
-                zoomGesturesEnabled: false,
-                rotateGesturesEnabled: false,
-                tiltGesturesEnabled: false,
-                markers: {
-                  const Marker(markerId: MarkerId('current'), position: center),
-                  const Marker(
-                    markerId: MarkerId('driver1'),
-                    position: LatLng(27.4779, 89.6362),
-                  ),
-                  const Marker(
-                    markerId: MarkerId('driver2'),
-                    position: LatLng(27.4694, 89.6420),
-                  ),
-                  const Marker(
-                    markerId: MarkerId('driver3'),
-                    position: LatLng(27.4835, 89.6290),
-                  ),
-                },
-              ),
-              Positioned(
-                left: 18,
-                right: 18,
-                bottom: 14,
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: .10),
-                        blurRadius: 24,
-                        offset: const Offset(0, 12),
-                      ),
-                    ],
-                  ),
-                  child: const Row(
+                  const SizedBox(height: 3),
+                  const Row(
                     children: [
-                      Icon(Icons.location_on_rounded, color: Color(0xFFD2AB50)),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Current location: Clock Tower Square',
-                          style: TextStyle(fontWeight: FontWeight.w800),
-                        ),
+                      Icon(
+                        Icons.location_on_rounded,
+                        color: NorthuenTheme.orange,
+                        size: 18,
                       ),
+                      SizedBox(width: 5),
+                      Text(
+                        'Thimphu, Bhutan',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      Icon(Icons.keyboard_arrow_down_rounded),
                     ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Book a service',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(height: 12),
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.18,
-                children: [
-                  _ServiceCard(
-                    icon: Icons.two_wheeler_rounded,
-                    title: 'Ride',
-                    subtitle: 'Bike and car rides',
-                    onTap: onPickDrop,
-                  ),
-                  _ServiceCard(
-                    icon: Icons.inventory_2_rounded,
-                    title: 'Parcel Delivery',
-                    subtitle: 'Send packages fast',
-                    onTap: onPickDrop,
-                  ),
-                  _ServiceCard(
-                    icon: Icons.restaurant_rounded,
-                    title: 'Food Delivery',
-                    subtitle: 'Local meals nearby',
-                    onTap: onFood,
-                  ),
-                  _ServiceCard(
-                    icon: Icons.route_rounded,
-                    title: 'Pick & Drop',
-                    subtitle: 'Runner for errands',
-                    onTap: onPickDrop,
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E),
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.payments_rounded, color: Color(0xFFD2AB50)),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Cash, wallet, QR, and bank transfer options ready for Bhutan pilots.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
+            ),
+            CircleAvatar(
+              radius: 21,
+              backgroundColor: NorthuenTheme.primary.withValues(alpha: .1),
+              child: Text(
+                _firstName(
+                  user?.fullName ?? 'N',
+                ).characters.first.toUpperCase(),
+                style: const TextStyle(
+                  color: NorthuenTheme.primary,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-            ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        Text(
+          'Kuzuzangpo, ${_firstName(user?.fullName ?? 'there')}',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'What can we deliver for you today?',
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: NorthuenTheme.muted),
+        ),
+        const SizedBox(height: 16),
+        InkWell(
+          onTap: onFood,
+          borderRadius: BorderRadius.circular(8),
+          child: const IgnorePointer(
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search food, shops and products',
+                prefixIcon: Icon(Icons.search_rounded),
+                suffixIcon: Icon(Icons.tune_rounded),
+              ),
+            ),
           ),
+        ),
+        const SizedBox(height: 22),
+        const NorthuenSectionHeader(
+          title: 'Services',
+          subtitle: 'One app for every local delivery',
+        ),
+        const SizedBox(height: 12),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 1.55,
+          children: [
+            _ServiceItem(
+              icon: Icons.restaurant_rounded,
+              label: 'Food',
+              subtitle: 'Meals from local kitchens',
+              color: NorthuenTheme.orange,
+              onTap: onFood,
+            ),
+            _ServiceItem(
+              icon: Icons.storefront_rounded,
+              label: 'Shops',
+              subtitle: 'Browse nearby stores',
+              color: NorthuenTheme.teal,
+              onTap: onShop,
+            ),
+            _ServiceItem(
+              icon: Icons.shopping_basket_rounded,
+              label: 'Grocery',
+              subtitle: 'Daily essentials delivered',
+              color: NorthuenTheme.success,
+              onTap: onShop,
+            ),
+            _ServiceItem(
+              icon: Icons.route_rounded,
+              label: 'Pick & Drop',
+              subtitle: 'Runner for local errands',
+              color: NorthuenTheme.primary,
+              onTap: onPickDrop,
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _ParcelServiceCard(onTap: onParcel),
+        const SizedBox(height: 22),
+        _PromoBanner(onTap: onPickDrop),
+        const SizedBox(height: 24),
+        NorthuenSectionHeader(
+          title: 'Fast local delivery',
+          subtitle: 'Built for daily errands around Bhutan',
+          actionLabel: 'Explore',
+          onAction: onFood,
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _BenefitCard(
+                icon: Icons.payments_outlined,
+                title: 'Cash on delivery',
+                caption: 'Pay when your order arrives',
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _BenefitCard(
+                icon: Icons.location_searching_rounded,
+                title: 'Live tracking',
+                caption: 'Follow your runner in real time',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _BenefitCard(
+                icon: Icons.support_agent_rounded,
+                title: 'Direct contact',
+                caption: 'Chat or call your runner',
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _BenefitCard(
+                icon: Icons.verified_user_outlined,
+                title: 'Reliable service',
+                caption: 'Clear status at every step',
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -239,63 +197,216 @@ class HomeDashboardScreen extends StatelessWidget {
   static String _firstName(String value) => value.trim().split(' ').first;
 }
 
-class _ServiceCard extends StatelessWidget {
-  const _ServiceCard({
+class _ServiceItem extends StatelessWidget {
+  const _ServiceItem({
     required this.icon,
-    required this.title,
+    required this.label,
     required this.subtitle,
+    required this.color,
     required this.onTap,
   });
 
   final IconData icon;
-  final String title;
+  final String label;
   final String subtitle;
+  final Color color;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(22),
-      child: Ink(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: .05),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
+      borderRadius: BorderRadius.circular(8),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(13),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: .1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(icon, color: color, size: 22),
+                  ),
+                  const Spacer(),
+                  Icon(Icons.arrow_forward_rounded, color: color, size: 18),
+                ],
+              ),
+              const Spacer(),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _ParcelServiceCard extends StatelessWidget {
+  const _ParcelServiceCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: NorthuenTheme.orange.withValues(alpha: .1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.inventory_2_outlined,
+                  color: NorthuenTheme.orange,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Send a parcel',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    SizedBox(height: 3),
+                    Text(
+                      'Book a standard parcel delivery with cash on delivery.',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: NorthuenTheme.muted,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_rounded,
+                color: NorthuenTheme.orange,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PromoBanner extends StatelessWidget {
+  const _PromoBanner({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: NorthuenTheme.primary,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Need something moved?',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Book a local runner for parcels, documents and errands.',
+                  style: TextStyle(color: Colors.white70, height: 1.35),
+                ),
+                const SizedBox(height: 14),
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: NorthuenTheme.primary,
+                    minimumSize: const Size(0, 40),
+                  ),
+                  onPressed: onTap,
+                  icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                  label: const Text('Book Pick & Drop'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 14),
+          const Icon(
+            Icons.delivery_dining_rounded,
+            color: Colors.white,
+            size: 64,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BenefitCard extends StatelessWidget {
+  const _BenefitCard({
+    required this.icon,
+    required this.title,
+    required this.caption,
+  });
+  final IconData icon;
+  final String title;
+  final String caption;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD2AB50).withValues(alpha: .18),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(icon, color: const Color(0xFF1E1E1E)),
-            ),
-            const Spacer(),
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                color: Color(0xFF6B7280),
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            Icon(icon, color: NorthuenTheme.teal),
+            const SizedBox(height: 12),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 3),
+            Text(caption, style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../state/app_state.dart';
+import '../core/app_theme.dart';
 import 'auth_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -17,18 +18,18 @@ class ProfileScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E1E1E),
-            borderRadius: BorderRadius.circular(24),
+            color: NorthuenTheme.primary,
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             children: [
               CircleAvatar(
                 radius: 34,
-                backgroundColor: const Color(0xFFD2AB50),
+                backgroundColor: Colors.white,
                 child: Text(
                   user.fullName.substring(0, 1),
                   style: const TextStyle(
-                    color: Color(0xFF1E1E1E),
+                    color: NorthuenTheme.primary,
                     fontWeight: FontWeight.w900,
                     fontSize: 24,
                   ),
@@ -123,8 +124,8 @@ class _ProfileTile extends StatelessWidget {
       child: Card(
         child: ListTile(
           leading: CircleAvatar(
-            backgroundColor: const Color(0xFFD2AB50).withValues(alpha: .18),
-            child: Icon(icon, color: const Color(0xFF1E1E1E)),
+            backgroundColor: NorthuenTheme.primary.withValues(alpha: .08),
+            child: Icon(icon, color: NorthuenTheme.primary),
           ),
           title: Text(
             title,

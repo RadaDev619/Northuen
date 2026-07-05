@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/app_theme.dart';
 import '../state/app_state.dart';
+import '../widgets/northuen_ui.dart';
 import 'auth_screen.dart';
 import 'role_home_screen.dart';
 
@@ -12,17 +14,20 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   bool _started = false;
+  late final AnimationController _animation = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..forward();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_started) {
       _started = true;
-      final app = context.read<AppState>();
-      final navigator = Navigator.of(context);
-      _restore(app, navigator);
+      _restore(context.read<AppState>(), Navigator.of(context));
     }
   }
 
@@ -38,68 +43,72 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   @override
+  void dispose() {
+    _animation.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final fade = CurvedAnimation(parent: _animation, curve: Curves.easeOut);
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFF8F6F1), Color(0xFFF1E7D3)],
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD2AB50),
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: .12),
-                    blurRadius: 28,
-                    offset: const Offset(0, 16),
+      backgroundColor: NorthuenTheme.primary,
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: fade,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 30),
+            child: Column(
+              children: [
+                const Spacer(flex: 3),
+                ScaleTransition(
+                  scale: Tween<double>(begin: .82, end: 1).animate(fade),
+                  child: const NorthuenBrandMark(size: 88, inverse: true),
+                ),
+                const SizedBox(height: 22),
+                const Text(
+                  'Northuen',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 38,
+                    fontWeight: FontWeight.w900,
                   ),
-                ],
-              ),
-              child: const Icon(
-                Icons.near_me_rounded,
-                size: 48,
-                color: Color(0xFF1E1E1E),
-              ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'One App. Every Delivery.',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Food  •  Shops  •  Parcels  •  Pick & Drop',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+                const Spacer(flex: 3),
+                const SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2.5,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'Delivery built for Bhutan',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 22),
-            const Text(
-              'Northuen',
-              style: TextStyle(
-                fontSize: 38,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Move Anything, Anywhere',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF6B7280),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 34),
-            const SizedBox(
-              width: 34,
-              height: 34,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                color: Color(0xFFD2AB50),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

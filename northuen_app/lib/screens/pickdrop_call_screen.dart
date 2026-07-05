@@ -70,7 +70,7 @@ class _PickDropCallScreenState extends State<PickDropCallScreen> {
         : call.callerName;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF101418),
+      backgroundColor: NorthuenTheme.primaryDark,
       appBar: AppBar(
         title: const Text('Northuen call'),
         backgroundColor: Colors.transparent,

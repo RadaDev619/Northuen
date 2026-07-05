@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../models/notification_model.dart';
 import '../state/app_state.dart';
+import '../core/app_theme.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -72,11 +73,11 @@ class _NotificationCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   backgroundColor: unread
-                      ? const Color(0xFFD2AB50)
-                      : const Color(0xFFE8E1D6),
+                      ? NorthuenTheme.primary.withValues(alpha: .1)
+                      : NorthuenTheme.background,
                   child: Icon(
                     _iconFor(item.type),
-                    color: const Color(0xFF1E1E1E),
+                    color: unread ? NorthuenTheme.primary : NorthuenTheme.muted,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -102,7 +103,7 @@ class _NotificationCard extends StatelessWidget {
                               width: 9,
                               height: 9,
                               decoration: const BoxDecoration(
-                                color: Color(0xFF16A34A),
+                                color: NorthuenTheme.primary,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -111,7 +112,7 @@ class _NotificationCard extends StatelessWidget {
                       const SizedBox(height: 5),
                       Text(
                         item.message,
-                        style: const TextStyle(color: Color(0xFF4B5563)),
+                        style: const TextStyle(color: NorthuenTheme.muted),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -149,7 +150,8 @@ class _EmptyNotifications extends StatelessWidget {
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: NorthuenTheme.border),
       ),
       child: const Column(
         children: [

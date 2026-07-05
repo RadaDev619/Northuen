@@ -24,7 +24,7 @@ class DirectionHintCard extends StatelessWidget {
         color: Colors.white,
         elevation: 12,
         shadowColor: Colors.black.withValues(alpha: .14),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
@@ -34,7 +34,7 @@ class DirectionHintCard extends StatelessWidget {
                 height: 42,
                 decoration: BoxDecoration(
                   color: NorthuenTheme.gold.withValues(alpha: .20),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(_iconFor(step.maneuver), color: NorthuenTheme.dark),
               ),

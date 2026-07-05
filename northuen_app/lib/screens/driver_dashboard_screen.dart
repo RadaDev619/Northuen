@@ -6,6 +6,7 @@ import '../models/pickdrop_model.dart';
 import '../state/app_state.dart';
 import '../widgets/money_text.dart';
 import '../widgets/status_chip.dart';
+import '../core/app_theme.dart';
 import 'delivery_screen.dart';
 import 'pickdrop_driver_screen.dart';
 import 'profile_screen.dart';
@@ -98,7 +99,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: NorthuenTheme.primary,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -244,7 +245,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: NorthuenTheme.teal,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -348,9 +349,7 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
               available: _pickDropView == 'AVAILABLE',
               online: _online,
               busy: _acceptingId == order.id,
-              onAccept: !_online
-                  ? null
-                  : () => _acceptPickDropOrder(order.id),
+              onAccept: !_online ? null : () => _acceptPickDropOrder(order.id),
               onReject: () => _rejectPickDropOrder(order.id),
               onOpen: () => Navigator.of(context).push(
                 MaterialPageRoute(
@@ -501,8 +500,8 @@ class _PickDropCard extends StatelessWidget {
                           busy
                               ? 'Accepting...'
                               : online
-                                  ? 'Accept request'
-                                  : 'Go online to accept',
+                              ? 'Accept request'
+                              : 'Go online to accept',
                         ),
                       ),
                     ),
@@ -613,8 +612,8 @@ class _DriverOrderCard extends StatelessWidget {
                       busy
                           ? 'Accepting...'
                           : online
-                              ? 'Accept parcel delivery'
-                              : 'Go online to accept',
+                          ? 'Accept parcel delivery'
+                          : 'Go online to accept',
                     ),
                   ),
                 )
